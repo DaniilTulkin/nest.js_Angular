@@ -3,9 +3,9 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { from, Observable, throwError } from 'rxjs';
 import { switchMap, map, catchError } from 'rxjs/operators'
-import { AuthService } from 'src/auth/services/auth.service';
 
 import { User, UserDocument } from '../models/user.schema';
+import { AuthService } from 'src/auth/services/auth.service';
 
 @Injectable()
 export class UserService {
@@ -87,5 +87,9 @@ export class UserService {
 
     findByEmail(email: string): Observable<User> {
         return from(this.userModel.findOne({email}));
+    }
+
+    updateRoleOfUser(_id: string, user: User): Observable<any> {
+        return from(this.userModel.updateOne({_id}, user).exec());
     }
 }
