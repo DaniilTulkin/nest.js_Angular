@@ -1,25 +1,50 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { from, Observable } from 'rxjs';
+import { from, Observable, throwError } from 'rxjs';
+import { switchMap, map, catchError } from 'rxjs/operators'
+import { AuthService } from 'src/auth/services/auth.service';
 
 import { User, UserDocument } from '../models/user.schema';
 
 @Injectable()
 export class UserService {
-    constructor(@InjectModel(User.name) private readonly userModel: Model<UserDocument>) {}
+    constructor(@InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+                private authService: AuthService) {}
 
-    create(user: User): Observable<User> {
-        const newUser = new this.userModel(user);
-        return from(newUser.save());
+    create(user: User): Observable<Partial<User>> {
+        return this.authService.hashPassword(user.password).pipe(
+            switchMap((passwordHash: string) => {
+                user.password = passwordHash;
+                const newUser = new this.userModel(user);
+
+                return from(newUser.save()).pipe(
+                    map((user: User) => {
+                        user.password = undefined;
+                        return user;
+                    }),
+                    catchError(err => throwError(() => new Error(err)))
+                )
+            })
+        )
+    } 
+
+    findOne(_id: string): Observable<Partial<User>> {
+        return from(this.userModel.findById(_id)).pipe(
+            map((user: User) => {
+                user.password = undefined;
+                return user;
+            })
+        );
     }
 
-    findOne(_id: string): Observable<User> {
-        return from(this.userModel.findById(_id));
-    }
-
-    findAll(): Observable<User[]> {
-        return from(this.userModel.find().exec())
+    findAll(): Observable<Partial<User>[]> {
+        return from(this.userModel.find().exec()).pipe(
+            map((users: User[]) => {
+                users.forEach(user => {user.password = undefined;});
+                return users;
+            })
+        )
     }
 
     deleteOne(_id: string): Observable<any> {
@@ -27,6 +52,40 @@ export class UserService {
     }
 
     updateOne(_id: string, user: User): Observable<any> {
+        delete user.email;
+        delete user.password;
+
         return from(this.userModel.updateOne({_id}, user).exec())
+    }
+
+    login(user: User): Observable<string> {
+        return this.validateUser(user.email, user.password).pipe(
+          switchMap((user: User) => {
+            if(user) {
+                return this.authService.generateJWT(user).pipe(
+                    map((jwt: string) => jwt)
+                );
+            }
+            else return 'Wrong Credentials';
+          })
+        );
+    }
+
+    validateUser(email: string, password: string): Observable<Partial<User>> {
+        return this.findByEmail(email).pipe(
+            switchMap((user: User) => this.authService.comparePasswords(password, user.password).pipe(
+                map((match: boolean) => {
+                    if(match) {
+                        user.password = undefined;;
+                        return user;
+                    }
+                    else throw Error;
+                })
+            ))
+        );
+    }
+
+    findByEmail(email: string): Observable<User> {
+        return from(this.userModel.findOne({email}));
     }
 }
