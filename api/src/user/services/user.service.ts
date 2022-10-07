@@ -38,8 +38,12 @@ export class UserService {
         );
     }
 
-    findAll(): Observable<Partial<User>[]> {
-        return from(this.userModel.find().exec()).pipe(
+    findAll(page: number, limit: number): Observable<Partial<User>[]> {
+        return from(
+            this.userModel.find()
+                          .skip((page - 1) * limit)
+                          .limit(limit)
+                          .exec()).pipe(
             map((users: User[]) => {
                 users.forEach(user => {user.password = undefined;});
                 return users;
@@ -54,6 +58,7 @@ export class UserService {
     updateOne(_id: string, user: User): Observable<any> {
         delete user.email;
         delete user.password;
+        delete user.role;
 
         return from(this.userModel.updateOne({_id}, user).exec())
     }

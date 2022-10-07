@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators'
 
@@ -36,8 +36,8 @@ export class UserController {
     }
 
     @Get()
-    findAll(): Observable<Partial<User>[]> {
-        return this.userService.findAll();
+    findAll(@Query('page') page: number = 1, @Query('limit') limit: number = 10): Observable<Partial<User>[]> {
+        return this.userService.findAll(page, limit);
     }
 
     @Delete(':_id')
