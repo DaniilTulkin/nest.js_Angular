@@ -5,6 +5,7 @@ import { map } from 'rxjs/operators'
 import { User } from 'src/app/interfaces/user.interface';
 
 import { AuthenticationService } from 'src/app/services/authentication.service';
+import { CustomValidators } from 'src/app/validators/custom-validators';
 
 @Component({
   selector: 'app-register',
@@ -23,10 +24,10 @@ export class RegisterComponent implements OnInit {
       name: [null, Validators.required],
       username: [null, Validators.required],
       email: [null, [Validators.required, Validators.email]],
-      password: [null, [Validators.required, Validators.minLength(3)]],
+      password: [null, [Validators.required, Validators.minLength(3), CustomValidators.passwordContainsNumber]],
       passwordConfirm: [null, Validators.required]
     }, {
-      
+      validators: CustomValidators.passwordMatch
     })
   }
 

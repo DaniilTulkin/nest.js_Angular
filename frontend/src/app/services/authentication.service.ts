@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs/operators';
 
-import { LoginForm } from '../interfaces/login-form.interface';
 import { User } from '../interfaces/user.interface';
+import { LoginForm } from '../interfaces/login-form.interface';
 
 @Injectable({
   providedIn: 'root'
