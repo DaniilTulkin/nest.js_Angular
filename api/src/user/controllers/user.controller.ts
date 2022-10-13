@@ -37,8 +37,10 @@ export class UserController {
     }
 
     @Get()
-    findAll(@Query('page') page: number, @Query('limit') limit: number): Observable<PaginateResult<User>> {
-        return this.userService.findAll(Number(page), Number(limit));
+    findAll(@Query('page') page: number = 1, 
+            @Query('limit') limit: number = 10,
+            @Query('username') username: string): Observable<PaginateResult<User>> {
+        return this.userService.findAll(Number(page), Number(limit), username);
     }
 
     @Delete(':_id')

@@ -38,13 +38,15 @@ export class UserService {
         );
     }
 
-    findAll(page: number, limit: number): Observable<PaginateResult<User>> {
-        return from(this.userModel.paginate({}, {page, limit})).pipe(
+    findAll(page: number, limit: number, username: string): Observable<PaginateResult<User>> {
+        const query = username ? {username: new RegExp(username)} : {};
+        const options = {page, limit};
+        return from(this.userModel.paginate(query, options)).pipe(
             map((paginateResult: PaginateResult<User>) => {
                 paginateResult.docs.forEach(user => {user.password = undefined;});
                 return paginateResult;
             })
-        )
+        );
     }
 
     deleteOne(_id: string): Observable<any> {
@@ -56,7 +58,7 @@ export class UserService {
         delete user.password;
         delete user.role;
 
-        return from(this.userModel.updateOne({_id}, user).exec())
+        return from(this.userModel.updateOne({_id}, user).exec());
     }
 
     login(user: User): Observable<string> {
