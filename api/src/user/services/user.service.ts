@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, PaginateModel, PaginateResult } from 'mongoose';
 import { from, Observable, throwError } from 'rxjs';
 import { switchMap, map, catchError } from 'rxjs/operators'
 
@@ -9,7 +9,7 @@ import { AuthService } from 'src/auth/services/auth.service';
 
 @Injectable()
 export class UserService {
-    constructor(@InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+    constructor(@InjectModel(User.name) private readonly userModel: PaginateModel<UserDocument>,
                 private authService: AuthService) {}
 
     create(user: User): Observable<Partial<User>> {
@@ -38,15 +38,11 @@ export class UserService {
         );
     }
 
-    findAll(page: number, limit: number): Observable<Partial<User>[]> {
-        return from(
-            this.userModel.find()
-                          .skip((page - 1) * limit)
-                          .limit(limit)
-                          .exec()).pipe(
-            map((users: User[]) => {
-                users.forEach(user => {user.password = undefined;});
-                return users;
+    findAll(page: number, limit: number): Observable<PaginateResult<User>> {
+        return from(this.userModel.paginate({}, {page, limit})).pipe(
+            map((paginateResult: PaginateResult<User>) => {
+                paginateResult.docs.forEach(user => {user.password = undefined;});
+                return paginateResult;
             })
         )
     }

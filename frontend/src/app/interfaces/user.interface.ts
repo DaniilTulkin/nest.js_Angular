@@ -1,7 +1,8 @@
 export interface User {
-    name: string,
-    username: string,
-    email: string,
-    password: string,
-    passwordConfirm: string;
+    name: string;
+    username: string;
+    email: string;
+    password: string;
+    role?: string;
+    // passwordConfirm: string;
 }

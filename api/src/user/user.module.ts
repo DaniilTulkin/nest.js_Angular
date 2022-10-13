@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import * as mongoosePaginate from 'mongoose-paginate-v2';
 
 import { UserController } from './controllers/user.controller';
 import { User, UserSchema } from './models/user.schema';
@@ -8,10 +9,14 @@ import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports:[
-    MongooseModule.forFeature([
+    MongooseModule.forFeatureAsync([
       {
         name: User.name, 
-        schema: UserSchema
+        useFactory: () => {
+          const schema = UserSchema;
+          schema.plugin(mongoosePaginate)
+          return schema;
+        }
       }
     ]),
     AuthModule

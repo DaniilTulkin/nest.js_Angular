@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { PaginateResult } from 'mongoose';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators'
 
@@ -36,8 +37,8 @@ export class UserController {
     }
 
     @Get()
-    findAll(@Query('page') page: number = 1, @Query('limit') limit: number = 10): Observable<Partial<User>[]> {
-        return this.userService.findAll(page, limit);
+    findAll(@Query('page') page: number, @Query('limit') limit: number): Observable<PaginateResult<User>> {
+        return this.userService.findAll(Number(page), Number(limit));
     }
 
     @Delete(':_id')
