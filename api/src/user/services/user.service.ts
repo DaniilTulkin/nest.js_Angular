@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, PaginateModel, PaginateResult } from 'mongoose';
+import { PaginateModel, PaginateResult } from 'mongoose';
 import { from, Observable, throwError } from 'rxjs';
 import { switchMap, map, catchError } from 'rxjs/operators'
 
