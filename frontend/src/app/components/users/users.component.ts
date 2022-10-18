@@ -39,9 +39,17 @@ export class UsersComponent implements OnInit {
     let page = event.pageIndex + 1;
     let size = event.pageSize;
 
-    this.userService.findAll(page, size).pipe(
-      map((userData: UserData) => this.dataSource = userData)
-    ).subscribe();
+    if(!this.filterValue) {
+      this.userService.findAll(page, size).pipe(
+        map((userData: UserData) => this.dataSource = userData)
+      ).subscribe();
+    }
+    else {
+      this.userService.paginateByName(page, size, this.filterValue).pipe(
+        map((userData: UserData) => this.dataSource = userData)
+      ).subscribe();
+    }
+
   }
 
   findByName(userName: string) {
