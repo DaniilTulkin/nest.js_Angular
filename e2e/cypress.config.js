@@ -14,4 +14,11 @@ module.exports = defineConfig({
     },
     specPattern: "**/*.cy.ts",
   },
+  
+  reporter: "mochawesome",
+  reporterOptions: {
+    overwrite: false,
+    html: false,
+    json: true
+  }
 });
