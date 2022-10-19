@@ -25,6 +25,9 @@ export class User {
         default: RolesEnum.USER
     })
     role: RolesEnum;
+
+    @Prop()
+    profileimage: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

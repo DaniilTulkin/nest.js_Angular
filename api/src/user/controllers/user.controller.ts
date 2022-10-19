@@ -1,7 +1,11 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UploadedFile, UseGuards, UseInterceptors, Request, Res } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { PaginateResult } from 'mongoose';
 import { Observable, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators'
+import { map, catchError } from 'rxjs/operators';
+import { diskStorage } from 'multer';
+import { v4 as uuidv4 } from 'uuid';
+import path, { join } from 'path';
 
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
@@ -58,5 +62,31 @@ export class UserController {
     @Put(':_id/role')
     updateRoleOfUser(@Param('_id') _id: string, @Body() user: User): Observable<any> {
         return this.userService.updateRoleOfUser(_id, user);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Post('upload')
+    @UseInterceptors(FileInterceptor('file', {
+        storage: diskStorage({
+            destination: './uploads/profileimages',
+            filename: (req, file, cd) => {
+                const filename: string = path.parse(file.originalname).name.replace(/\s/g, '') + uuidv4();
+                const extension: string = path.parse(file.originalname).ext;
+
+                cd(null, `${filename}${extension}`);
+            }
+        })
+    }))
+    uploadFile(@UploadedFile() file, @Request() req): Observable<Object> {
+        const user: User = req.user.user;
+
+        return this.userService.updateOne(user['_id'], {profileimage: file.filename} as User).pipe(
+            map((user: User) => ({profileimage: user.profileimage}))
+        );
+    }
+
+    @Get('profile-image/:imagename')
+    findProfileImage(@Param('imagename') imagename, @Res() res): Observable<Object> {
+        return of(res.sendFile(join(process.cwd(), 'uploads/profileimages' + imagename)));
     }
 }

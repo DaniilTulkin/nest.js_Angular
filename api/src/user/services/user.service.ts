@@ -58,7 +58,9 @@ export class UserService {
         delete user.password;
         delete user.role;
 
-        return from(this.userModel.updateOne({_id}, user).exec());
+        return from(this.userModel.updateOne({_id}, user).exec()).pipe(
+            switchMap(() => this.findOne(_id))
+        );
     }
 
     login(user: User): Observable<string> {
