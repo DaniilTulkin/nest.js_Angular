@@ -9,14 +9,9 @@ import { Router } from '@angular/router';
 export class AppComponent {
   title = 'frontend';
   options = [
-    {
-      name: 'Login',
-      link: 'login'
-    },
-    {
-      name: 'Register',
-      link: 'register'
-    }
+    {name: 'Login', link: 'login'},
+    {name: 'Register', link: 'register'},
+    {name: 'Update profile', link: 'update-profile'}
   ]
 
   constructor(private router: Router) {}
