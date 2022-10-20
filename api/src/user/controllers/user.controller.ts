@@ -13,6 +13,7 @@ import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { RolesEnum } from '../enums/roles.enum';
 import { User } from '../models/user.schema';
 import { UserService } from '../services/user.service';
+import { UserIsUserGuard } from 'src/auth/guards/user-is-user.guard';
 
 @Controller('users')
 export class UserController {
@@ -52,6 +53,7 @@ export class UserController {
         return this.userService.deleteOne(_id);
     }
 
+    @UseGuards(JwtAuthGuard, UserIsUserGuard)
     @Put(':_id')
     updateOne(@Param('_id') _id: string, @Body() user: User): Observable<any> {
         return this.userService.updateOne(_id, user);
